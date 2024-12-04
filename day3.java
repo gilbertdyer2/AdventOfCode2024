@@ -1,6 +1,7 @@
 public class day3 {
     public static void main(String[] args) {
         System.out.println(multiplyCorrupt());
+        System.out.println(multiplyCorruptWithConditionals());
     }
 
     public static int multiplyCorrupt() {
@@ -10,6 +11,51 @@ public class day3 {
         while (input.indexOf("mul(", i) != -1) {
             int nextIdx = input.indexOf("mul(", i);
             
+            // Check for next closing perenthesis and verify it is valid distance away
+            int closePeren = input.indexOf(")", nextIdx);
+            if (closePeren - nextIdx >= 7 && closePeren - nextIdx <= 11) {
+                // Split mult(...) substring by comma, verify the length is 2
+                // Then check parseInt for each, catching error if parseInt throws exception
+                String nums = input.substring(nextIdx + 4, closePeren); // starts @ first number, ends with 2nd (not including closing peren)
+                String[] split = nums.split(",");
+
+                if (split.length == 2) {
+                    try {
+                        int num1 = Integer.parseInt(split[0]);
+                        int num2 = Integer.parseInt(split[1]);
+
+                        total += num1 * num2;
+                    }
+                    catch (Exception e) {
+                        // numbers were invalid - continue, don't need to handle anything here
+                    }
+                }
+            }
+
+            // Increment i 
+            i = nextIdx + 1;
+        }
+
+        return total;
+    }
+
+    public static int multiplyCorruptWithConditionals() {
+        int total = 0;
+
+        int i = 0;
+        while (input.indexOf("mul(", i) != -1) {
+            int nextIdx = input.indexOf("mul(", i);
+            int nextDo = input.indexOf("do()", i);
+            int nextDont = input.indexOf("don't()", i);
+            // If the next "don't()" exists and appears before our nextIdx of "mul(", we can skip to the next "do()"
+            if (nextDont != -1 && !(nextDont > nextIdx + 8)) {
+                i = nextDo + 1;
+                // If there are no more "do()"'s, break out early
+                if (nextDo == -1)
+                    break;
+                continue;
+            }
+
             // Check for next closing perenthesis and verify it is valid distance away
             int closePeren = input.indexOf(")", nextIdx);
             if (closePeren - nextIdx >= 7 && closePeren - nextIdx <= 11) {
