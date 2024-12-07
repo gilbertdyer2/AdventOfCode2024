@@ -2,8 +2,46 @@ public class day4 {
     
 
     public static void main(String[] args) {
+        initRows();
         System.out.println(findXmas());
+        System.out.println(findXmasPt2());
     }
+
+
+    public static int findXmasPt2() {
+        // Strategy: iterate through elements (minus first and last row/col)
+        // If the center letter is a, then check if both diagonals contain m and s 
+        int count = 0;
+        // Rows is our 2d char array of the input
+        for (int i = 1; i < rows.length - 1; i++) {
+            for (int j = 1; j < rows[0].length - 1; j++) {
+                if (rows[i][j] == 'A') {
+                    
+                    if (isXMAS(rows[i - 1][j - 1], rows[i + 1][j + 1]) && // check top left and bottom right chars
+                        isXMAS(rows[i + 1][j - 1], rows[i - 1][j + 1])) { // check bottom left and top right chars
+
+                        count++;
+                    }
+                }
+                
+                
+            }
+        }
+
+        return count;
+    }
+
+    public static boolean isXMAS(char c1, char c2) {
+        boolean mFound = false;
+        boolean sFound = false;
+        if (c1 == 'M' || c2 == 'M')
+            mFound = true;
+        if (c1 == 'S' || c2 == 'S')
+            sFound = true;
+
+        return (mFound && sFound);
+    }
+
 
     public static int findXmas() {
         int total = 0;
