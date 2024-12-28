@@ -6,6 +6,16 @@ input = """
 # Remove newline, space chars
 input = re.sub(r'\s+', '', input)
 
+def calculate_checksum(expanded_input):
+    checksum = 0
+
+    for i in range(len(expanded_input)):
+        if (expanded_input[i] != '.'):
+            checksum += (i * int(expanded_input[i]))
+        
+
+    return checksum
+
 
 # Build expanded string representation of compressed disk
 expanded = []
@@ -19,7 +29,6 @@ for i in range(len(input)):
             expanded.append(fileID)
 
             # Store non-empties as [original indice, value] to use later
-            # Original indice is i + j, since we are adding j elements
             ne_list = [len(expanded) - 1, fileID]
             non_empty_stack.append(ne_list)
         fileID += 1
@@ -28,23 +37,14 @@ for i in range(len(input)):
         for j in range( int(input[i]) ):
             expanded.append('.') 
 
-print(expanded[0:100])
-print(non_empty_stack[0:100])
-print(f"length: {len(expanded)}")
 # Loop through and fill empty space by popping stack
 for i in range(len(expanded)):
     # If at free space, pop val from stack
     if (expanded[i] == '.'):
         popped = non_empty_stack.pop()
-
-        # Replace stored original indice of pop with empty '.'
+        # Replace stored original indice of pop with empty '.' , then set current indice to the popped value
         expanded[popped[0]] = '.'
-        # Then, set current indice to the popped value
         expanded[i] = popped[1]
-    # # If stack is empty, escape loop
-    # if (len(non_empty_stack) == 0):
-    #     print(f"stopped at {i} of {len(expanded)}")
-    #     break
 
     # If rest of elements are '.', escape loop
     number_found = False
@@ -60,15 +60,69 @@ for i in range(len(expanded)):
 print(expanded[0:100])
 
 # Calculate checksum
-checksum = 0
-
-for i in range(len(expanded)):
-    if (expanded[i] == '.'):
-        # print(expanded[i: i+1000])
-        print(f"break input at: {i}")
-        break
-    checksum += (i * int(expanded[i]))
+checksum = calculate_checksum(expanded)
 
 # print(expanded[0:100])
 print(f"Checksum: {checksum}")
 
+
+# ----- PART 2 ----- #
+# Same strategy, but instead we will be appending lists to the stack, then adding a nested for loop to check the amount of free space
+#   - May be faster if you dynamically updated a dictionary of {[free space index, amount of free space]}, but could fail because of 'leftmost' restriction
+
+expanded = []
+non_empty_stack = []
+
+fileID = 0
+for i in range(len(input)):
+    # Non-empty space, fill with 'input[i]' fileIDs
+    if (i % 2 == 0):
+        # Store non-empties as group of [original indice, value, length]
+        ne_list = [len(expanded), fileID, int(input[i])]
+        non_empty_stack.append(ne_list)
+
+        for j in range( int(input[i]) ):
+            expanded.append(fileID)
+
+        fileID += 1
+    # Empty space, fill with 'input[i]' periods
+    else:
+        for j in range( int(input[i]) ):
+            expanded.append('.') 
+print(expanded[0:50])
+print(non_empty_stack[0:10])
+# Pop every element from stack and see if we can move it
+while (len(non_empty_stack) > 0):
+    popped = non_empty_stack.pop() # By rules, pop the element regardless; if no space exists, don't move it 
+        
+    # loop through left side  (0 -> popped element's indice) and check if available space exists
+    for j in range(0, popped[0], 1):
+        moved = False
+        index_of_space = j # store j in case we increment
+    
+        available_space_here = 0
+        if (expanded[j] == '.'):
+            while(expanded[j] == '.' and j < popped[0]):
+                available_space_here += 1
+                j += 1
+
+            # If enough space, move the block
+            if (available_space_here >= popped[2]):
+                moved = True
+                # Clear previous popped indices
+                for k in range(popped[0], popped[0] + popped[2], 1):
+                    expanded[k] = '.'
+                # Set free space to popped value
+                for k in range(index_of_space, index_of_space + popped[2], 1):
+                    expanded[k] = popped[1]
+        
+        if (moved):
+            # print("Moved")
+            break
+
+# print(expanded[0:100])
+# Calculate checksum
+checksum = calculate_checksum(expanded)
+print(f"Checksum: {checksum}")
+
+# 2862277994168
