@@ -16,8 +16,12 @@ def calculate_checksum(expanded_input):
 
     return checksum
 
+# ----- Part 1 ----- #
+# Strategy: - Build an expanded representation of the compressed input and push every non-empty value to a stack
+#           - Loop through the expanded representation. If an empty space is found, replace it with the next pop from the stack
+# -------------------#
 
-# Build expanded string representation of compressed disk
+# Build expanded list representation of compressed disk
 expanded = []
 non_empty_stack = []
 
@@ -57,19 +61,17 @@ for i in range(len(expanded)):
     if (number_found == False):
         break
 
-print(expanded[0:100])
 
 # Calculate checksum
-checksum = calculate_checksum(expanded)
-
-# print(expanded[0:100])
-print(f"Checksum: {checksum}")
-
+print(calculate_checksum(expanded))
+# Ans: 6337921897505
 
 # ----- PART 2 ----- #
 # Same strategy, but instead we will be appending lists to the stack, then adding a nested for loop to check the amount of free space
-#   - May be faster if you dynamically updated a dictionary of {[free space index, amount of free space]}, but could fail because of 'leftmost' restriction
+#   - May be faster if you dynamically updated a dictionary of {[free space index, amount of free space]}, but could fail because of the 'leftmost' restriction
+# ------------------ #
 
+# Build expanded list and stack
 expanded = []
 non_empty_stack = []
 
@@ -89,13 +91,12 @@ for i in range(len(input)):
     else:
         for j in range( int(input[i]) ):
             expanded.append('.') 
-print(expanded[0:50])
-print(non_empty_stack[0:10])
+
 # Pop every element from stack and see if we can move it
 while (len(non_empty_stack) > 0):
     popped = non_empty_stack.pop() # By rules, pop the element regardless; if no space exists, don't move it 
         
-    # loop through left side  (0 -> popped element's indice) and check if available space exists
+    # loop through left side (0 -> popped element's indice) and check if available space exists
     for j in range(0, popped[0], 1):
         moved = False
         index_of_space = j # store j in case we increment
@@ -109,20 +110,17 @@ while (len(non_empty_stack) > 0):
             # If enough space, move the block
             if (available_space_here >= popped[2]):
                 moved = True
-                # Clear previous popped indices
+                # Clear previous indices of popped
                 for k in range(popped[0], popped[0] + popped[2], 1):
                     expanded[k] = '.'
-                # Set free space to popped value
+                # Set the free space we found to popped value
                 for k in range(index_of_space, index_of_space + popped[2], 1):
                     expanded[k] = popped[1]
-        
+
+        # Exit if we moved the block
         if (moved):
-            # print("Moved")
             break
 
-# print(expanded[0:100])
 # Calculate checksum
-checksum = calculate_checksum(expanded)
-print(f"Checksum: {checksum}")
-
-# 2862277994168
+print(calculate_checksum(expanded))
+# Ans: 6362722604045
